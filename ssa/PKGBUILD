@@ -1,0 +1,38 @@
+# Maintainer: Nicholas Galderisi <ngalderisi@spar.com>
+
+pkgname=ssa
+pkgver=5.20_8.0
+pkgrel=1
+pkgdesc="HPE Smart Storage Administrator Web GUI"
+arch=(x86_64)
+url="https://downloads.linux.hpe.com/SDR/downloads/mcp"
+depends=(bash)
+groups=(hpproliant)
+license=("CUSTOM")
+source=("https://downloads.linux.hpe.com/SDR/repo/mcp/Alma/8/x86_64/current/${pkgname}-${pkgver//_/-}.x86_64.rpm"
+        hpessad.service)
+sha256sums=('4d0e93cf85f62aea41b4bc2a772398d921fa68c4819cbc6b4f027f78cca5a190'
+            '788d279afcae9fcda3c8af8bd054cf7a57455ec633cc8fabd3c79e01988116b0')
+
+package() {
+    # Changing permission to the binaries to strip
+    chmod 755 ${srcdir}/opt/smartstorageadmin/ssa/bin/ssa
+    chmod 755 ${srcdir}/opt/smartstorageadmin/ssa/bin/ssaclient
+
+    # Stripping the binaries
+    strip --strip-unneeded ${srcdir}/opt/smartstorageadmin/ssa/bin/ssa
+    strip --strip-unneeded ${srcdir}/opt/smartstorageadmin/ssa/bin/ssaclient
+
+    # Changing permission back
+    chmod 500 ${srcdir}/opt/smartstorageadmin/ssa/bin/ssa
+    chmod 500 ${srcdir}/opt/smartstorageadmin/ssa/bin/ssaclient
+
+	install -Dm644 ${srcdir}/opt/smartstorageadmin/ssa/ssa.license ${pkgdir}/usr/share/licenses/${pkgname}/LICENSE.txt
+	rm ${srcdir}/opt/smartstorageadmin/ssa/ssa.license
+	cp -r ${srcdir}/opt ${pkgdir}/opt
+    cp -r ${srcdir}/usr/sbin ${pkgdir}/usr/bin
+    cp -r ${srcdir}/usr/man ${pkgdir}/usr/share/man
+
+    # Systemd unit file install
+    install -Dm644 hpessad.service ${pkgdir}/usr/lib/systemd/system/hpessad.service
+}

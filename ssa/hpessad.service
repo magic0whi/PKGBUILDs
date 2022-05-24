@@ -1,0 +1,9 @@
+[Unit]
+Description=HPE Smart Storage Administrator daemon
+After=network.target
+
+[Service]
+ExecStart=/usr/sbin/ssa -local
+
+[Install]
+WantedBy=multi-user.target

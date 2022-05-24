@@ -1,0 +1,32 @@
+pkgname=ssacli
+pkgver=5.20_8.0
+pkgrel=1
+pkgdesc="HPE Smart Storage Administrator CLI"
+arch=(x86_64)
+url="https://downloads.linux.hpe.com/SDR/downloads/mcp"
+depends=(bash)
+groups=(hpproliant)
+license=('custom:HPE End User License Agreement – Enterprise Version')
+source=("https://downloads.linux.hpe.com/SDR/repo/mcp/Alma/8/x86_64/current/ssacli-5.20-8.0.x86_64.rpm")
+sha256sums=('e8a7fec56c3d4dc26e3f06fa8c506b7b1d63f09a5292f5688a7d7691c64a9ee3')
+
+package() {
+	# Changing permission to the binaries to strip
+	chmod 755 ${srcdir}/opt/smartstorageadmin/ssacli/bin/ssacli
+	chmod 755 ${srcdir}/opt/smartstorageadmin/ssacli/bin/ssascripting
+
+	# Stripping the binaries
+	strip --strip-unneeded ${srcdir}/opt/smartstorageadmin/ssacli/bin/rmstr 
+	strip --strip-unneeded ${srcdir}/opt/smartstorageadmin/ssacli/bin/ssacli 
+	strip --strip-unneeded ${srcdir}/opt/smartstorageadmin/ssacli/bin/ssascripting
+
+	# Changing permission back
+	chmod 500 ${srcdir}/opt/smartstorageadmin/ssacli/bin/ssacli
+	chmod 500 ${srcdir}/opt/smartstorageadmin/ssacli/bin/ssascripting
+
+	install -Dm644 ${srcdir}/opt/smartstorageadmin/ssacli/bin/ssacli.license ${pkgdir}/usr/share/licenses/${pkgname}/LICENSE.txt
+    rm ${srcdir}/opt/smartstorageadmin/ssacli/bin/ssacli.license
+	cp -r ${srcdir}/opt ${pkgdir}/opt
+	cp -r ${srcdir}/usr/sbin ${pkgdir}/usr/bin
+	cp -r ${srcdir}/usr/man ${pkgdir}/usr/share/man
+}
