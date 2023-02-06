@@ -1,0 +1,37 @@
+# Maintainer: Proteus Ndoskrnl <lollipop.studio.cn@gmail.com>
+pkgname=img-gpu-powervr-bin
+pkgver=1.17.6210866
+pkgrel=1
+pkgdesc="GPU library packages from Imagination and provide GPU firmware, libOpenCL, vulkan, gles2, gles3. This library is not open source, only provide with binary library."
+arch=(riscv64)
+url="https://github.com/starfive-tech/soft_3rdpart/tree/VF2_v2.8.0"
+license=('unknown')
+source=(https://media.githubusercontent.com/media/starfive-tech/soft_3rdpart/VF2_v2.8.0/IMG_GPU/out/$pkgname-$pkgver.tar.gz)
+sha256sums=('8ef5eba77c776e0d4444d819e12c64bfa8eee0ae2cdf90b6eb7a3a9df7bd7ef2')
+
+package() {
+  cd "$pkgname-$pkgver/target"
+
+  install -Dm644 etc/OpenCL/vendors/IMG.icd    "$pkgdir/etc/OpenCL/vendors/IMG.icd"
+  install -Dm644 etc/vulkan/icd.d/icdconf.json "$pkgdir/etc/vulkan/icd.d/icdconf.json"
+
+  install -Dm644 -t "$pkgdir/usr/lib/firmware/"  lib/firmware/rgx.{fw,sh}.36.50.54.182
+
+  install -Dm644 -t "$pkgdir/usr/lib/" usr/lib/lib*.so."$pkgver"
+
+  for file in $(find usr/lib/ -type l -regextype posix-extended -regex ".*\.so(\.[012])?"); do
+    ln -rsf "$pkgdir/${file%.1}.$pkgver" "$pkgdir/${file}"
+  done
+  ln -rsf "$pkgdir/usr/lib/libGLESv1_CM_PVR_MESA.so.$pkgver" "$pkgdir/usr/lib/libGLESv1_CM.so"
+  ln -rsf "$pkgdir/usr/lib/libGLESv1_CM_PVR_MESA.so.$pkgver" "$pkgdir/usr/lib/libGLESv1_CM.so.1"
+  ln -rsf "$pkgdir/usr/lib/libGLESv2_PVR_MESA.so.$pkgver"    "$pkgdir/usr/lib/libGLESv2.so"
+  ln -rsf "$pkgdir/usr/lib/libGLESv2_PVR_MESA.so.$pkgver"    "$pkgdir/usr/lib/libGLESv2.so.2"
+  ln -rsf "$pkgdir/usr/lib/libPVROCL.so.1"                   "$pkgdir/usr/lib/libOpenCL.so"
+  ln -rsf "$pkgdir/usr/lib/libPVROCL.so.1"                   "$pkgdir/usr/lib/libOpenCL.so.1"
+  ln -rsf "$pkgdir/usr/lib/libvulkan.so.1"                   "$pkgdir/usr/lib/libvulkan-1.so"
+  ln -rsf "$pkgdir/usr/lib/libvulkan.so.1"                   "$pkgdir/usr/lib/libvulkan.so.0"
+  rm "$pkgdir"/usr/lib/libOpenCL.so{,.1} # owned by ocl-icd
+  rm "$pkgdir"/usr/lib/libvulkan.so{,.1} # owned by vulkan-icd-loader
+
+  install -Dm755 -t "$pkgdir/usr/local/bin" usr/local/bin/*
+}
